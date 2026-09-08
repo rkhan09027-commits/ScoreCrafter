@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScoreCrafters - Login / Signup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-indigo-950 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full">
+        <h2 class="text-3xl font-extrabold text-indigo-900 text-center mb-2">ScoreCrafters</h2>
+        <p class="text-center text-gray-500 mb-6">Student Account Login / Signup</p>
+
+        <form id="authForm" onsubmit="handleLogin(event)">
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 mb-1">Full Name</label>
+                <input type="text" id="name" required class="w-full border p-3 rounded-lg focus:outline-indigo-600" placeholder="Aapka Naam">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 mb-1">Mobile Number / Email</label>
+                <input type="text" id="contact" required class="w-full border p-3 rounded-lg focus:outline-indigo-600" placeholder="9876543210 ya email@gmail.com">
+            </div>
+            <button type="submit" class="w-full bg-indigo-900 text-white font-bold py-3 rounded-lg hover:bg-indigo-800 shadow-md">Continue / Login</button>
+        </form>
+    </div>
+
+    <script>
+        function handleLogin(e) {
+            e.preventDefault();
+            const userData = {
+                name: document.getElementById('name').value,
+                mobile: document.getElementById('contact').value
+            };
+            localStorage.setItem('user', JSON.stringify(userData));
+            alert("Login Successful!");
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

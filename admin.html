@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScoreCrafters - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-2xl mx-auto bg-gray-800 p-6 rounded-xl shadow-xl">
+        <h2 class="text-2xl font-bold text-yellow-400 mb-6">ScoreCrafters Admin Panel (Add Question)</h2>
+
+        <form onsubmit="addQuestion(event)">
+            <!-- Question Hindi -->
+            <div class="mb-4">
+                <label class="block text-sm font-semibold mb-1">Question (Hindi)</label>
+                <textarea id="qHi" required class="w-full p-2 bg-gray-700 rounded text-white"></textarea>
+            </div>
+            <!-- Question English -->
+            <div class="mb-4">
+                <label class="block text-sm font-semibold mb-1">Question (English)</label>
+                <textarea id="qEn" required class="w-full p-2 bg-gray-700 rounded text-white"></textarea>
+            </div>
+
+            <!-- Options Hindi -->
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                <input type="text" id="optH0" placeholder="Option A (Hindi)" required class="p-2 bg-gray-700 rounded">
+                <input type="text" id="optH1" placeholder="Option B (Hindi)" required class="p-2 bg-gray-700 rounded">
+                <input type="text" id="optH2" placeholder="Option C (Hindi)" required class="p-2 bg-gray-700 rounded">
+                <input type="text" id="optH3" placeholder="Option D (Hindi)" required class="p-2 bg-gray-700 rounded">
+            </div>
+
+            <!-- Options English -->
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                <input type="text" id="optE0" placeholder="Option A (English)" required class="p-2 bg-gray-700 rounded">
+                <input type="text" id="optE1" placeholder="Option B (English)" required class="p-2 bg-gray-700 rounded">
+                <input type="text" id="optE2" placeholder="Option E (English)" required class="p-2 bg-gray-700 rounded">
+                <input type="text" id="optE3" placeholder="Option D (English)" required class="p-2 bg-gray-700 rounded">
+            </div>
+
+            <button type="submit" class="w-full bg-green-600 font-bold py-3 rounded hover:bg-green-700">Add Question to Portal</button>
+        </form>
+    </div>
+
+    <script>
+        function addQuestion(e) {
+            e.preventDefault();
+            let currentQs = JSON.parse(localStorage.getItem('customQuestions')) || [];
+            
+            const newQ = {
+                hi: document.getElementById('qHi').value,
+                en: document.getElementById('qEn').value,
+                optsHi: [
+                    document.getElementById('optH0').value,
+                    document.getElementById('optH1').value,
+                    document.getElementById('optH2').value,
+                    document.getElementById('optH3').value
+                ],
+                optsEn: [
+                    document.getElementById('optE0').value,
+                    document.getElementById('optE1').value,
+                    document.getElementById('optE2').value,
+                    document.getElementById('optE3').value
+                ],
+                status: 'not-visited',
+                selected: null
+            };
+
+            currentQs.push(newQ);
+            localStorage.setItem('customQuestions', JSON.stringify(currentQs));
+            alert("Question Added Successfully!");
+            location.reload();
+        }
+    </script>
+</body>
+</html>
