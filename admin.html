@@ -11,6 +11,30 @@
         <h2 class="text-2xl font-bold text-yellow-400 mb-6">ScoreCrafters Admin Panel (Add Question)</h2>
 
         <form onsubmit="addQuestion(event)">
+            <!-- Exam and Subject Selection Dropdowns -->
+<div class="flex gap-4 mb-4">
+  <!-- Exam Category -->
+  <div class="flex-1">
+    <label class="block text-sm font-semibold mb-1">Select Exam:</label>
+    <select id="examCategory" class="w-full p-2 bg-gray-700 rounded text-white">
+      <option value="UP Police Constable">UP Police Constable</option>
+      <option value="UP Police SI">UP Police SI</option>
+      <option value="RPF Constable">RPF Constable</option>
+      <option value="RPF SI">RPF SI</option>
+      <option value="UP Cooperative Bank">UP Cooperative Bank</option>
+    </select>
+  </div>
+  <!-- Subject / Section Selection -->
+  <div class="flex-1">
+    <label class="block text-sm font-semibold mb-1">Select Subject / Part:</label>
+    <select id="subjectCategory" class="w-full p-2 bg-gray-700 rounded text-white">
+      <option value="General Knowledge">General Knowledge (GK/GS)</option>
+      <option value="Hindi">General Hindi</option>
+      <option value="Numerical Ability">Maths (Numerical Ability)</option>
+      <option value="Mental Ability">Reasoning / Mental Ability</option>
+    </select>
+  </div>
+</div>
             <!-- Question Hindi -->
             <div class="mb-4">
                 <label class="block text-sm font-semibold mb-1">Question (Hindi)</label>
