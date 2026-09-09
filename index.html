@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ScoreCrafters - Online Test Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col font-sans">
 
@@ -36,7 +39,7 @@
         </select>
       </div>
 
-      <button onclick="startTest()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-extrabold py-3 rounded-lg transition shadow-lg text-lg">
+      <button onclick="startTest()" id="startBtn" class="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-extrabold py-3 rounded-lg transition shadow-lg text-lg">
         🚀 Start Mock Test
       </button>
     </div>
@@ -125,28 +128,53 @@
   </div>
 
   <script>
+    const firebaseConfig = {
+      projectId: "scorecrafter-b4ff1",
+      authDomain: "scorecrafter-b4ff1.firebaseapp.com",
+      storageBucket: "scorecrafter-b4ff1.appspot.com"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
     let currentQuestions = [];
     let userAnswers = {};
     let currentIndex = 0;
     let selectedExam = "";
 
-    function startTest() {
+    async function startTest() {
+      const startBtn = document.getElementById("startBtn");
+      startBtn.disabled = true;
+      startBtn.innerText = "⏳ Loading Questions from Cloud...";
+
       selectedExam = document.getElementById("examSelect").value;
-      const allQuestions = JSON.parse(localStorage.getItem("scorecrafter_questions") || "[]");
-      currentQuestions = allQuestions.filter(q => q.exam === selectedExam);
 
-      if (currentQuestions.length === 0) {
-        alert("Is Exam ke abhi tak koi questions add nahi hue hain! Pehle Admin Panel se questions add karein.");
-        return;
+      try {
+        const snapshot = await db.collection("questions")
+          .where("exam", "==", selectedExam)
+          .get();
+
+        currentQuestions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        if (currentQuestions.length === 0) {
+          alert("Is Exam ke abhi tak koi questions add nahi hue hain! Pehle Admin Panel se questions add karein.");
+          startBtn.disabled = false;
+          startBtn.innerText = "🚀 Start Mock Test";
+          return;
+        }
+
+        document.getElementById("setupScreen").classList.add("hidden");
+        document.getElementById("testInterface").classList.remove("hidden");
+        document.getElementById("timerBox").classList.remove("hidden");
+
+        renderSubjects();
+        loadQuestion(0);
+        renderPalette();
+      } catch (err) {
+        alert("Error fetching test: " + err.message);
+        startBtn.disabled = false;
+        startBtn.innerText = "🚀 Start Mock Test";
       }
-
-      document.getElementById("setupScreen").classList.add("hidden");
-      document.getElementById("testInterface").classList.remove("hidden");
-      document.getElementById("timerBox").classList.remove("hidden");
-
-      renderSubjects();
-      loadQuestion(0);
-      renderPalette();
     }
 
     function renderSubjects() {
@@ -245,7 +273,6 @@
       document.getElementById("resAccuracy").innerText = accuracy + "%";
       document.getElementById("resultExamTitle").innerText = selectedExam;
 
-      // Render Detailed Solutions
       const solList = document.getElementById("solutionsList");
       solList.innerHTML = "";
 
