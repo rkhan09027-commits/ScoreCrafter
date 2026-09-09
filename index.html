@@ -1,40 +1,277 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ScoreCrafters - Login / Signup</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScoreCrafters - Online Test Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-indigo-950 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full">
-        <h2 class="text-3xl font-extrabold text-indigo-900 text-center mb-2">ScoreCrafters</h2>
-        <p class="text-center text-gray-500 mb-6">Student Account Login / Signup</p>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col font-sans">
 
-        <form id="authForm" onsubmit="handleLogin(event)">
-            <div class="mb-4">
-                <label class="block text-sm font-bold text-gray-700 mb-1">Full Name</label>
-                <input type="text" id="name" required class="w-full border p-3 rounded-lg focus:outline-indigo-600" placeholder="Aapka Naam">
-            </div>
-            <div class="mb-4">
-                <label class="block text-sm font-bold text-gray-700 mb-1">Mobile Number / Email</label>
-                <input type="text" id="contact" required class="w-full border p-3 rounded-lg focus:outline-indigo-600" placeholder="9876543210 ya email@gmail.com">
-            </div>
-            <button type="submit" class="w-full bg-indigo-900 text-white font-bold py-3 rounded-lg hover:bg-indigo-800 shadow-md">Continue / Login</button>
-        </form>
+  <!-- Header -->
+  <header class="bg-gray-800 border-b border-gray-700 p-4 flex justify-between items-center shadow-md">
+    <div class="flex items-center space-x-2">
+      <span class="text-2xl font-black text-yellow-400 tracking-wider">SCORECRAFTERS</span>
+      <span class="bg-blue-600 text-xs text-white px-2 py-0.5 rounded font-bold">MOCK TEST</span>
+    </div>
+    <div id="timerBox" class="hidden bg-red-900/80 border border-red-500 text-red-200 text-sm font-mono px-3 py-1 rounded-lg animate-pulse">
+      Time Remaining: <span id="time" class="font-bold text-white">00:00</span>
+    </div>
+  </header>
+
+  <!-- Setup Screen -->
+  <main id="setupScreen" class="flex-1 flex justify-center items-center p-6">
+    <div class="bg-gray-800 border border-gray-700 p-8 rounded-2xl max-w-md w-full shadow-2xl text-center">
+      <h2 class="text-2xl font-bold text-yellow-400 mb-2">Select Your Exam</h2>
+      <p class="text-xs text-gray-400 mb-6">Apna exam chunen aur live test start karein</p>
+
+      <div class="mb-6 text-left">
+        <label class="block text-xs font-semibold text-gray-300 mb-2">TARGET EXAM:</label>
+        <select id="examSelect" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white font-semibold">
+          <option value="UPSSSC PET">UPSSSC PET</option>
+          <option value="UP Police SI">UP Police SI (Daroga)</option>
+          <option value="UP Police Constable">UP Police Constable</option>
+          <option value="RPF Constable">RPF Constable</option>
+          <option value="RPF SI">RPF SI</option>
+        </select>
+      </div>
+
+      <button onclick="startTest()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-extrabold py-3 rounded-lg transition shadow-lg text-lg">
+        🚀 Start Mock Test
+      </button>
+    </div>
+  </main>
+
+  <!-- Test Interface -->
+  <div id="testInterface" class="hidden flex-1 flex flex-col md:flex-row h-[calc(100vh-65px)]">
+    
+    <!-- Main Question Area -->
+    <div class="flex-1 p-6 overflow-y-auto flex flex-col justify-between">
+      <div>
+        <!-- Subject Tabs -->
+        <div id="subjectTabs" class="flex space-x-2 border-b border-gray-700 pb-3 mb-6 overflow-x-auto"></div>
+
+        <!-- Question Header -->
+        <div class="flex justify-between items-center mb-4 text-xs text-gray-400">
+          <span id="qIndex" class="font-bold text-yellow-400 text-sm">Question #1</span>
+          <span class="bg-gray-800 px-2 py-1 rounded border border-gray-700">+1.0 / -0.25 Marks</span>
+        </div>
+
+        <!-- Question Body -->
+        <div id="qText" class="text-lg font-medium text-gray-100 mb-6 bg-gray-800/50 p-4 rounded-xl border border-gray-700"></div>
+
+        <!-- Options -->
+        <div id="optionsContainer" class="space-y-3"></div>
+      </div>
+
+      <!-- Bottom Controls -->
+      <div class="flex justify-between items-center pt-4 border-t border-gray-800 mt-6">
+        <button onclick="prevQuestion()" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-5 py-2 rounded-lg transition text-sm">⬅️ Previous</button>
+        <button onclick="nextQuestion()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-2 rounded-lg transition text-sm">Next ➡️</button>
+      </div>
     </div>
 
-    <script>
-        function handleLogin(e) {
-            e.preventDefault();
-            const userData = {
-                name: document.getElementById('name').value,
-                mobile: document.getElementById('contact').value
-            };
-            localStorage.setItem('user', JSON.stringify(userData));
-            alert("Login Successful!");
-            window.location.href = "index.html";
+    <!-- Question Palette Sidebar -->
+    <div class="w-full md:w-80 bg-gray-800 border-l border-gray-700 p-4 flex flex-col justify-between">
+      <div>
+        <h3 class="text-xs font-bold text-gray-400 mb-3 tracking-wider">QUESTION PALETTE</h3>
+        <div id="paletteGrid" class="grid grid-cols-5 gap-2 max-h-96 overflow-y-auto p-1"></div>
+      </div>
+
+      <button onclick="submitTest()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg transition shadow-md mt-6">
+        ✅ Submit Test
+      </button>
+    </div>
+  </div>
+
+  <!-- Result & Solutions Modal -->
+  <div id="resultModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center p-4 z-50">
+    <div class="bg-gray-800 border border-gray-700 rounded-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div class="text-center border-b border-gray-700 pb-4 mb-4">
+        <h2 class="text-2xl font-bold text-yellow-400">Mock Test Result</h2>
+        <p id="resultExamTitle" class="text-xs text-gray-400"></p>
+      </div>
+
+      <!-- Scorecard Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div class="bg-gray-700/50 p-3 rounded-xl border border-gray-600 text-center">
+          <span class="block text-xs text-gray-400">Total Score</span>
+          <span id="resScore" class="text-xl font-black text-yellow-400">0</span>
+        </div>
+        <div class="bg-gray-700/50 p-3 rounded-xl border border-gray-600 text-center">
+          <span class="block text-xs text-gray-400">Correct</span>
+          <span id="resCorrect" class="text-xl font-black text-green-400">0</span>
+        </div>
+        <div class="bg-gray-700/50 p-3 rounded-xl border border-gray-600 text-center">
+          <span class="block text-xs text-gray-400">Incorrect</span>
+          <span id="resWrong" class="text-xl font-black text-red-400">0</span>
+        </div>
+        <div class="bg-gray-700/50 p-3 rounded-xl border border-gray-600 text-center">
+          <span class="block text-xs text-gray-400">Accuracy</span>
+          <span id="resAccuracy" class="text-xl font-black text-blue-400">0%</span>
+        </div>
+      </div>
+
+      <!-- Solutions Area -->
+      <div class="border-t border-gray-700 pt-4">
+        <h3 class="text-lg font-bold text-yellow-400 mb-3">Detailed Solutions & Explanations</h3>
+        <div id="solutionsList" class="space-y-4"></div>
+      </div>
+
+      <button onclick="location.reload()" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg mt-6 transition">
+        🔄 Re-take Test
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let currentQuestions = [];
+    let userAnswers = {};
+    let currentIndex = 0;
+    let selectedExam = "";
+
+    function startTest() {
+      selectedExam = document.getElementById("examSelect").value;
+      const allQuestions = JSON.parse(localStorage.getItem("scorecrafter_questions") || "[]");
+      currentQuestions = allQuestions.filter(q => q.exam === selectedExam);
+
+      if (currentQuestions.length === 0) {
+        alert("Is Exam ke abhi tak koi questions add nahi hue hain! Pehle Admin Panel se questions add karein.");
+        return;
+      }
+
+      document.getElementById("setupScreen").classList.add("hidden");
+      document.getElementById("testInterface").classList.remove("hidden");
+      document.getElementById("timerBox").classList.remove("hidden");
+
+      renderSubjects();
+      loadQuestion(0);
+      renderPalette();
+    }
+
+    function renderSubjects() {
+      const subjects = [...new Set(currentQuestions.map(q => q.subject))];
+      const tabs = document.getElementById("subjectTabs");
+      tabs.innerHTML = "";
+
+      subjects.forEach((sub, idx) => {
+        const btn = document.createElement("button");
+        btn.className = `px-3 py-1 rounded-md text-xs font-bold transition ${idx === 0 ? 'bg-yellow-500 text-gray-900' : 'bg-gray-700 text-gray-300'}`;
+        btn.innerText = sub;
+        btn.onclick = () => {
+          const firstSubIndex = currentQuestions.findIndex(q => q.subject === sub);
+          if (firstSubIndex !== -1) loadQuestion(firstSubIndex);
+        };
+        tabs.appendChild(btn);
+      });
+    }
+
+    function loadQuestion(index) {
+      currentIndex = index;
+      const q = currentQuestions[index];
+
+      document.getElementById("qIndex").innerText = `Question #${index + 1} (${q.subject})`;
+      document.getElementById("qText").innerText = q.question;
+
+      const optsBox = document.getElementById("optionsContainer");
+      optsBox.innerHTML = "";
+
+      ["A", "B", "C", "D"].forEach(key => {
+        const isSelected = userAnswers[q.id] === key;
+        const div = document.createElement("div");
+        div.className = `p-3 rounded-lg border transition cursor-pointer flex items-center space-x-3 ${isSelected ? 'bg-yellow-500/20 border-yellow-500 text-yellow-300' : 'bg-gray-800 border-gray-700 hover:bg-gray-750'}`;
+        div.onclick = () => selectOption(q.id, key);
+
+        div.innerHTML = `
+          <span class="w-6 h-6 rounded-full bg-gray-700 border border-gray-600 flex items-center justify-center font-bold text-xs">${key}</span>
+          <span class="text-sm font-medium">${q.options[key]}</span>
+        `;
+        optsBox.appendChild(div);
+      });
+
+      renderPalette();
+    }
+
+    function selectOption(qId, key) {
+      userAnswers[qId] = key;
+      loadQuestion(currentIndex);
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) loadQuestion(currentIndex - 1);
+    }
+
+    function nextQuestion() {
+      if (currentIndex < currentQuestions.length - 1) loadQuestion(currentIndex + 1);
+    }
+
+    function renderPalette() {
+      const grid = document.getElementById("paletteGrid");
+      grid.innerHTML = "";
+
+      currentQuestions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        const isAns = userAnswers[q.id];
+        const isCurr = idx === currentIndex;
+
+        btn.className = `h-8 text-xs font-bold rounded ${isCurr ? 'ring-2 ring-yellow-400' : ''} ${isAns ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-300'}`;
+        btn.innerText = idx + 1;
+        btn.onclick = () => loadQuestion(idx);
+        grid.appendChild(btn);
+      });
+    }
+
+    function submitTest() {
+      if (!confirm("Kya aap sach mein Test Submit karna chahte hain?")) return;
+
+      let correct = 0;
+      let wrong = 0;
+
+      currentQuestions.forEach(q => {
+        const ans = userAnswers[q.id];
+        if (ans) {
+          if (ans === q.correctAnswer) correct++;
+          else wrong++;
         }
-    </script>
+      });
+
+      const totalAttempted = correct + wrong;
+      const score = (correct * 1) - (wrong * 0.25);
+      const accuracy = totalAttempted > 0 ? ((correct / totalAttempted) * 100).toFixed(1) : 0;
+
+      document.getElementById("resScore").innerText = score;
+      document.getElementById("resCorrect").innerText = correct;
+      document.getElementById("resWrong").innerText = wrong;
+      document.getElementById("resAccuracy").innerText = accuracy + "%";
+      document.getElementById("resultExamTitle").innerText = selectedExam;
+
+      // Render Detailed Solutions
+      const solList = document.getElementById("solutionsList");
+      solList.innerHTML = "";
+
+      currentQuestions.forEach((q, i) => {
+        const userAns = userAnswers[q.id] || "Not Attempted";
+        const isRight = userAns === q.correctAnswer;
+
+        const card = document.createElement("div");
+        card.className = "bg-gray-700/40 p-4 rounded-xl border border-gray-600 text-sm";
+
+        card.innerHTML = `
+          <div class="font-bold text-gray-200 mb-2">Q${i+1}. ${q.question}</div>
+          <div class="grid grid-cols-2 gap-2 text-xs mb-2">
+            <div class="${isRight ? 'text-green-400' : 'text-red-400'} font-semibold">Your Answer: ${userAns}</div>
+            <div class="text-green-400 font-semibold">Correct Answer: Option ${q.correctAnswer}</div>
+          </div>
+          <div class="bg-gray-800 p-2 rounded border border-gray-700 text-xs text-gray-300">
+            <span class="font-bold text-yellow-400 block mb-1">💡 Solution / Vyakhya:</span>
+            ${q.explanation || "Is question ki vyakhya uplabdh nahi hai."}
+          </div>
+        `;
+        solList.appendChild(card);
+      });
+
+      document.getElementById("resultModal").classList.remove("hidden");
+    }
+  </script>
 </body>
 </html>
