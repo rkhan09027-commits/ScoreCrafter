@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ScoreCrafters - Admin Panel</title>
+  <title>ScoreCrafters - Admin Panel (Cloud)</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-gray-900 text-white min-h-screen p-6">
 
@@ -12,15 +15,17 @@
     <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-3">
       <div>
         <h1 class="text-2xl font-bold text-yellow-400">ScoreCrafters</h1>
-        <p class="text-xs text-gray-400">Commercial Test Series Management</p>
+        <p class="text-xs text-gray-400">Cloud Live Admin Panel</p>
       </div>
-      <span class="bg-yellow-500/10 text-yellow-400 text-xs px-3 py-1 rounded-full border border-yellow-500/20 font-semibold">Admin Panel</span>
+      <span class="bg-green-500/10 text-green-400 text-xs px-3 py-1 rounded-full border border-green-500/20 font-semibold flex items-center gap-1">
+        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Cloud Live
+      </span>
     </div>
 
     <!-- Subject Limit Counter Badge -->
     <div id="counterBadge" class="bg-blue-900 border border-blue-500 text-blue-200 text-sm font-semibold p-3 rounded-lg mb-6 flex justify-between items-center">
       <span id="targetSubjectName">Subject Status:</span>
-      <span id="targetCountText" class="text-yellow-400 font-bold text-base">0 / 0 Added</span>
+      <span id="targetCountText" class="text-yellow-400 font-bold text-base">Loading...</span>
     </div>
 
     <form id="questionForm">
@@ -90,8 +95,8 @@
       </div>
 
       <!-- Submit / Add Next Question Button -->
-      <button type="submit" id="submitBtn" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg transition shadow-md">
-        ➕ Save & Add Next Question
+      <button type="submit" id="submitBtn" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg transition shadow-md flex justify-center items-center gap-2">
+        <span>➕ Save & Upload To Cloud</span>
       </button>
 
     </form>
@@ -100,6 +105,16 @@
   </div>
 
   <script>
+    // Firebase Config Integrated with your Project ID
+    const firebaseConfig = {
+      projectId: "scorecrafter-b4ff1",
+      authDomain: "scorecrafter-b4ff1.firebaseapp.com",
+      storageBucket: "scorecrafter-b4ff1.appspot.com"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
     const examRules = {
       "UPSSSC PET": {
         "General Knowledge (GK/GS)": 50,
@@ -147,43 +162,63 @@
       updateCounter();
     }
 
-    function updateCounter() {
+    async function updateCounter() {
       const selectedExam = document.getElementById("examSelect").value;
       const selectedSubject = document.getElementById("subjectSelect").value;
       const targetLimit = examRules[selectedExam][selectedSubject] || 50;
 
-      const questions = JSON.parse(localStorage.getItem("scorecrafter_questions") || "[]");
-      const currentCount = questions.filter(q => q.exam === selectedExam && q.subject === selectedSubject).length;
+      document.getElementById("targetCountText").innerText = "Syncing...";
 
-      document.getElementById("targetSubjectName").innerText = `${selectedSubject}:`;
-      document.getElementById("targetCountText").innerText = `${currentCount} / ${targetLimit} Questions Added`;
+      try {
+        const snapshot = await db.collection("questions")
+          .where("exam", "==", selectedExam)
+          .where("subject", "==", selectedSubject)
+          .get();
 
-      if (currentCount >= targetLimit) {
-        document.getElementById("counterBadge").className = "bg-green-900 border border-green-500 text-green-200 text-sm font-semibold p-3 rounded-lg mb-6 flex justify-between items-center";
-      } else {
-        document.getElementById("counterBadge").className = "bg-blue-900 border border-blue-500 text-blue-200 text-sm font-semibold p-3 rounded-lg mb-6 flex justify-between items-center";
+        const currentCount = snapshot.size;
+
+        document.getElementById("targetSubjectName").innerText = `${selectedSubject}:`;
+        document.getElementById("targetCountText").innerText = `${currentCount} / ${targetLimit} Added`;
+
+        if (currentCount >= targetLimit) {
+          document.getElementById("counterBadge").className = "bg-green-900 border border-green-500 text-green-200 text-sm font-semibold p-3 rounded-lg mb-6 flex justify-between items-center";
+        } else {
+          document.getElementById("counterBadge").className = "bg-blue-900 border border-blue-500 text-blue-200 text-sm font-semibold p-3 rounded-lg mb-6 flex justify-between items-center";
+        }
+      } catch (err) {
+        document.getElementById("targetCountText").innerText = "0 / " + targetLimit;
       }
     }
 
     updateSubjects();
 
-    document.getElementById("questionForm").addEventListener("submit", function(e) {
+    document.getElementById("questionForm").addEventListener("submit", async function(e) {
       e.preventDefault();
+
+      const btn = document.getElementById("submitBtn");
+      btn.disabled = true;
+      btn.innerText = "⏳ Saving to Cloud...";
 
       const selectedExam = document.getElementById("examSelect").value;
       const selectedSubject = document.getElementById("subjectSelect").value;
       const targetLimit = examRules[selectedExam][selectedSubject] || 50;
 
-      let questions = JSON.parse(localStorage.getItem("scorecrafter_questions") || "[]");
-      const currentCount = questions.filter(q => q.exam === selectedExam && q.subject === selectedSubject).length;
+      const snapshot = await db.collection("questions")
+        .where("exam", "==", selectedExam)
+        .where("subject", "==", selectedSubject)
+        .get();
+
+      const currentCount = snapshot.size;
 
       if (currentCount >= targetLimit) {
         alert(`Is Subject (${selectedSubject}) ke poore ${targetLimit} questions pehle hi add ho chuke hain! Ab agla subject select karein.`);
+        btn.disabled = false;
+        btn.innerText = "➕ Save & Upload To Cloud";
         return;
       }
 
       const newQuestion = {
-        id: Date.now(),
+        createdAt: Date.now(),
         exam: selectedExam,
         subject: selectedSubject,
         question: document.getElementById("qHi").value,
@@ -197,20 +232,26 @@
         explanation: document.getElementById("explanation").value
       };
 
-      questions.push(newQuestion);
-      localStorage.setItem("scorecrafter_questions", JSON.stringify(questions));
+      try {
+        await db.collection("questions").add(newQuestion);
 
-      const statusMsg = document.getElementById("statusMsg");
-      statusMsg.innerText = `✅ Question Saved! (${currentCount + 1}/${targetLimit})`;
-      statusMsg.classList.remove("hidden");
+        const statusMsg = document.getElementById("statusMsg");
+        statusMsg.innerText = `✅ Cloud Saved! (${currentCount + 1}/${targetLimit})`;
+        statusMsg.classList.remove("hidden");
 
-      document.getElementById("questionForm").reset();
-      document.getElementById("examSelect").value = selectedExam;
-      document.getElementById("subjectSelect").value = selectedSubject;
-      document.getElementById("qHi").focus();
+        document.getElementById("questionForm").reset();
+        document.getElementById("examSelect").value = selectedExam;
+        document.getElementById("subjectSelect").value = selectedSubject;
+        document.getElementById("qHi").focus();
 
-      updateCounter();
-      setTimeout(() => { statusMsg.classList.add("hidden"); }, 2500);
+        updateCounter();
+        setTimeout(() => { statusMsg.classList.add("hidden"); }, 2500);
+      } catch (error) {
+        alert("Error saving question: " + error.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "➕ Save & Upload To Cloud";
+      }
     });
   </script>
 </body>
