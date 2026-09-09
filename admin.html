@@ -9,8 +9,13 @@
 <body class="bg-gray-900 text-white min-h-screen p-6">
 
   <div class="max-w-2xl mx-auto bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
-    <h1 class="text-2xl font-bold text-yellow-400 mb-1">ScoreCrafters Admin Panel</h1>
-    <p class="text-xs text-gray-400 mb-4">Add Exam Questions & Mocks</p>
+    <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-3">
+      <div>
+        <h1 class="text-2xl font-bold text-yellow-400">ScoreCrafters</h1>
+        <p class="text-xs text-gray-400">Commercial Test Series Management</p>
+      </div>
+      <span class="bg-yellow-500/10 text-yellow-400 text-xs px-3 py-1 rounded-full border border-yellow-500/20 font-semibold">Admin Panel</span>
+    </div>
 
     <!-- Subject Limit Counter Badge -->
     <div id="counterBadge" class="bg-blue-900 border border-blue-500 text-blue-200 text-sm font-semibold p-3 rounded-lg mb-6 flex justify-between items-center">
@@ -67,7 +72,7 @@
       </div>
 
       <!-- Correct Answer Dropdown -->
-      <div class="mb-6">
+      <div class="mb-4">
         <label class="block text-sm font-semibold mb-1 text-yellow-400">Select Correct Answer (Sahi Option):</label>
         <select id="correctAns" required class="w-full p-2 bg-gray-700 rounded text-white border border-yellow-500 font-bold">
           <option value="">-- Choose Correct Option --</option>
@@ -76,6 +81,12 @@
           <option value="C">Option C</option>
           <option value="D">Option D</option>
         </select>
+      </div>
+
+      <!-- Explanation / Solution Box -->
+      <div class="mb-6">
+        <label class="block text-sm font-semibold mb-1 text-green-400">Solution / Vyakhya (Optional):</label>
+        <textarea id="explanation" class="w-full p-2 bg-gray-700 rounded text-white border border-gray-600" rows="2" placeholder="Sahi jawab ka karan ya detail vyakhya yahan likhein..."></textarea>
       </div>
 
       <!-- Submit / Add Next Question Button -->
@@ -182,23 +193,20 @@
           C: document.getElementById("optC").value,
           D: document.getElementById("optD").value
         },
-        correctAnswer: document.getElementById("correctAns").value
+        correctAnswer: document.getElementById("correctAns").value,
+        explanation: document.getElementById("explanation").value
       };
 
       questions.push(newQuestion);
       localStorage.setItem("scorecrafter_questions", JSON.stringify(questions));
 
-      // Show Status
       const statusMsg = document.getElementById("statusMsg");
       statusMsg.innerText = `✅ Question Saved! (${currentCount + 1}/${targetLimit})`;
       statusMsg.classList.remove("hidden");
 
-      // Reset Form Proper Way
       document.getElementById("questionForm").reset();
       document.getElementById("examSelect").value = selectedExam;
       document.getElementById("subjectSelect").value = selectedSubject;
-
-      // Auto-Focus Back to Question Box
       document.getElementById("qHi").focus();
 
       updateCounter();
