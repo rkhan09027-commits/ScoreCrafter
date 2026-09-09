@@ -9,6 +9,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <!-- Razorpay Checkout SDK -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col font-sans">
 
@@ -72,14 +74,13 @@
 
     <!-- Test Cards Grid -->
     <div id="testGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-      <!-- Cards Javascript se load honge -->
       <div class="col-span-full text-center py-12 text-gray-400 text-sm">
         ⏳ Test Series Load ho rahi hai...
       </div>
     </div>
   </div>
 
-  <!-- Test Interface (Hidden by default) -->
+  <!-- Test Interface -->
   <div id="testInterface" class="hidden flex-1 flex flex-col md:flex-row h-[calc(100vh-65px)]">
     <div class="flex-1 p-6 overflow-y-auto flex flex-col justify-between">
       <div>
@@ -110,7 +111,7 @@
     </div>
   </div>
 
-  <!-- Result & Solutions Modal -->
+  <!-- Result Modal -->
   <div id="resultModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center p-4 z-50">
     <div class="bg-gray-800 border border-gray-700 rounded-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
       <div class="text-center border-b border-gray-700 pb-4 mb-4">
@@ -118,7 +119,6 @@
         <p id="resultExamTitle" class="text-xs text-gray-400 mb-2"></p>
       </div>
 
-      <!-- Scorecard Grid -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <div class="bg-gray-700/50 p-3 rounded-xl border border-gray-600 text-center">
           <span class="block text-xs text-gray-400">Total Score</span>
@@ -138,7 +138,6 @@
         </div>
       </div>
 
-      <!-- Solutions Section -->
       <div class="border-t border-gray-700 pt-4">
         <h3 class="text-lg font-bold text-yellow-400 mb-3">Detailed Solutions & Explanations</h3>
         <div id="solutionsList" class="space-y-4"></div>
@@ -153,10 +152,12 @@
   <!-- Footer -->
   <footer class="bg-gray-800 border-t border-gray-700 py-6 text-center text-xs text-gray-400 mt-auto">
     <p>© 2026 <span class="text-yellow-400 font-bold">ScoreCrafters</span>. All rights reserved.</p>
-    <p class="mt-1">Dedicated Mock Test Portal for Police & Competitive Exams</p>
   </footer>
 
   <script>
+    // 🔴 APNI RAZORPAY KEY ID NICHE DENE VALI QUOTES KE ANDAR PASTE KAREIN 🔴
+    const RAZORPAY_KEY_ID = "rzp_test_YOUR_KEY_HERE"; 
+
     const firebaseConfig = {
       projectId: "scorecrafter-b4ff1",
       authDomain: "scorecrafter-b4ff1.firebaseapp.com",
@@ -172,22 +173,37 @@
     let userAnswers = {};
     let currentIndex = 0;
     let selectedExam = "";
-    let allAvailableExams = [];
+    let unlockedExams = [];
+    let examPricing = {};
 
-    // Auth Observer
-    auth.onAuthStateChanged(user => {
+    auth.onAuthStateChanged(async user => {
       if (user) {
         currentUser = user;
         document.getElementById("loginBtn").classList.add("hidden");
         document.getElementById("userInfo").classList.remove("hidden");
         document.getElementById("userName").innerText = user.displayName || "Student";
         document.getElementById("userAvatar").src = user.photoURL || "https://via.placeholder.com/32";
+        await fetchUserPurchases();
       } else {
         currentUser = null;
+        unlockedExams = [];
         document.getElementById("loginBtn").classList.remove("hidden");
         document.getElementById("userInfo").classList.add("hidden");
       }
+      loadExamCards();
     });
+
+    async function fetchUserPurchases() {
+      if (!currentUser) return;
+      try {
+        const snap = await db.collection("purchases")
+          .where("userId", "==", currentUser.uid)
+          .get();
+        unlockedExams = snap.docs.map(doc => doc.data().exam);
+      } catch (err) {
+        console.error("Purchase fetch error:", err);
+      }
+    }
 
     function loginWithGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
@@ -198,32 +214,29 @@
       auth.signOut();
     }
 
-    // Load Exam Cards on Startup
-    window.onload = function() {
-      loadExamCards();
-    };
-
     async function loadExamCards() {
       const grid = document.getElementById("testGrid");
       try {
-        const snapshot = await db.collection("questions").get();
+        const snap = await db.collection("questions").get();
         const exams = new Set();
         
-        snapshot.docs.forEach(doc => {
+        snap.docs.forEach(doc => {
           const data = doc.data();
-          if (data.exam) exams.add(data.exam);
+          if (data.exam) {
+            exams.add(data.exam);
+            if (data.price) examPricing[data.exam] = data.price;
+          }
         });
 
-        allAvailableExams = Array.from(exams);
-
-        if (allAvailableExams.length === 0) {
-          grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400 text-sm">Abhi tak koi Test Series upload nahi hui hai. Admin Panel se questions add karein!</div>`;
+        const examList = Array.from(exams);
+        if (examList.length === 0) {
+          grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400 text-sm">Abhi tak koi Test Series upload nahi hui hai.</div>`;
           return;
         }
 
-        renderExamCards(allAvailableExams);
+        renderExamCards(examList);
       } catch (err) {
-        grid.innerHTML = `<div class="col-span-full text-center py-12 text-red-400 text-sm">Error loading test series: ${err.message}</div>`;
+        grid.innerHTML = `<div class="col-span-full text-center py-12 text-red-400 text-sm">Error: ${err.message}</div>`;
       }
     }
 
@@ -232,71 +245,92 @@
       grid.innerHTML = "";
 
       examList.forEach((examName, idx) => {
+        const price = examPricing[examName] || 0; // Default Free
+        const isUnlocked = price === 0 || unlockedExams.includes(examName);
+
         const card = document.createElement("div");
         card.className = "bg-gray-800 border border-gray-700 rounded-2xl p-5 hover:border-yellow-500/50 transition shadow-xl flex flex-col justify-between";
+
+        let buttonHTML = "";
+        let badgeHTML = "";
+
+        if (isUnlocked) {
+          badgeHTML = `<span class="bg-green-500/10 text-green-400 border border-green-500/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">UNLOCKED / FREE</span>`;
+          buttonHTML = `
+            <button onclick="startSpecificTest('${examName}')" class="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-extrabold py-3 rounded-xl transition shadow-lg text-sm">
+              🚀 Start Test Now
+            </button>`;
+        } else {
+          badgeHTML = `<span class="bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">PAID PACK - ₹${price}</span>`;
+          buttonHTML = `
+            <button onclick="buyTestPack('${examName}', ${price})" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-extrabold py-3 rounded-xl transition shadow-lg text-sm flex items-center justify-center space-x-2">
+              <span>🔓 Unlock Pack @ ₹${price}</span>
+            </button>`;
+        }
 
         card.innerHTML = `
           <div>
             <div class="flex justify-between items-start mb-3">
-              <span class="bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">FREE MOCK TEST</span>
+              ${badgeHTML}
               <span class="text-xs text-gray-400 font-mono">Test #${idx + 1}</span>
             </div>
-            <h3 class="text-lg font-bold text-white mb-2">${examName} Full Mock Test</h3>
-            <p class="text-xs text-gray-400 mb-4">Official Syllabus par aadharit sabhi subjects ke important questions aur vyakhya.</p>
-            
-            <div class="flex items-center space-x-4 text-xs text-gray-300 font-medium mb-6 bg-gray-900/50 p-2.5 rounded-xl border border-gray-700/50">
-              <span class="flex items-center">📝 Bilingual</span>
-              <span class="flex items-center">⏱️ Timed Test</span>
-              <span class="flex items-center">💡 Vyakhya</span>
-            </div>
+            <h3 class="text-lg font-bold text-white mb-2">${examName} Full Test Series</h3>
+            <p class="text-xs text-gray-400 mb-4">Official Syllabus par aadharit Questions, Instant Score aur Vyakhya.</p>
           </div>
-
-          <button onclick="startSpecificTest('${examName}')" class="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-extrabold py-3 rounded-xl transition shadow-lg text-sm flex items-center justify-center space-x-2">
-            <span>🚀 Start Test Now</span>
-          </button>
+          ${buttonHTML}
         `;
         grid.appendChild(card);
       });
     }
 
-    function filterCategory(category) {
-      // Button UI Highlight
-      const btns = document.querySelectorAll('.cat-btn');
-      btns.forEach(btn => {
-        btn.classList.remove('bg-yellow-500', 'text-gray-900');
-        btn.classList.add('bg-gray-800', 'text-gray-300');
-      });
-      event.target.classList.remove('bg-gray-800', 'text-gray-300');
-      event.target.classList.add('bg-yellow-500', 'text-gray-900');
-
-      if (category === 'ALL') {
-        renderExamCards(allAvailableExams);
-      } else {
-        const filtered = allAvailableExams.filter(e => e.toLowerCase().includes(category.toLowerCase()));
-        renderExamCards(filtered.length > 0 ? filtered : [category]);
-      }
-    }
-
-    async function startSpecificTest(examName) {
+    function buyTestPack(examName, price) {
       if (!currentUser) {
-        alert("Pehle Google Login karein taaki aapka test result safe rahe!");
+        alert("Pehle Google Login karein taaki aapka Payment aapke account se link ho sake!");
         loginWithGoogle();
         return;
       }
 
+      const options = {
+        "key": RAZORPAY_KEY_ID,
+        "amount": price * 100, // Amount in paise
+        "currency": "INR",
+        "name": "ScoreCrafters",
+        "description": `${examName} Test Series Unlock`,
+        "handler": async function (response) {
+          try {
+            await db.collection("purchases").add({
+              userId: currentUser.uid,
+              userName: currentUser.displayName,
+              userEmail: currentUser.email,
+              exam: examName,
+              amount: price,
+              paymentId: response.razorpay_payment_id,
+              purchasedAt: Date.now()
+            });
+
+            alert(`Payment Successful! Payment ID: ${response.razorpay_payment_id}`);
+            unlockedExams.push(examName);
+            loadExamCards();
+          } catch (err) {
+            alert("Error saving payment details: " + err.message);
+          }
+        },
+        "prefill": {
+          "name": currentUser.displayName,
+          "email": currentUser.email
+        },
+        "theme": { "color": "#EAB308" }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+    }
+
+    async function startSpecificTest(examName) {
       selectedExam = examName;
-
       try {
-        const snapshot = await db.collection("questions")
-          .where("exam", "==", selectedExam)
-          .get();
-
+        const snapshot = await db.collection("questions").where("exam", "==", selectedExam).get();
         currentQuestions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        if (currentQuestions.length === 0) {
-          alert("Is Exam ke abhi questions add nahi hain! Admin Panel se add karein.");
-          return;
-        }
 
         document.getElementById("homePage").classList.add("hidden");
         document.getElementById("testInterface").classList.remove("hidden");
@@ -310,9 +344,7 @@
       }
     }
 
-    function goHome() {
-      location.reload();
-    }
+    function goHome() { location.reload(); }
 
     function renderSubjects() {
       const subjects = [...new Set(currentQuestions.map(q => q.subject))];
@@ -362,13 +394,8 @@
       loadQuestion(currentIndex);
     }
 
-    function prevQuestion() {
-      if (currentIndex > 0) loadQuestion(currentIndex - 1);
-    }
-
-    function nextQuestion() {
-      if (currentIndex < currentQuestions.length - 1) loadQuestion(currentIndex + 1);
-    }
+    function prevQuestion() { if (currentIndex > 0) loadQuestion(currentIndex - 1); }
+    function nextQuestion() { if (currentIndex < currentQuestions.length - 1) loadQuestion(currentIndex + 1); }
 
     function renderPalette() {
       const grid = document.getElementById("paletteGrid");
@@ -387,7 +414,7 @@
     }
 
     async function submitTest() {
-      if (!confirm("Kya aap sach mein Test Submit karna chahte hain?")) return;
+      if (!confirm("Test Submit karein?")) return;
 
       let correct = 0;
       let wrong = 0;
@@ -404,32 +431,12 @@
       const score = (correct * 1) - (wrong * 0.25);
       const accuracy = totalAttempted > 0 ? ((correct / totalAttempted) * 100).toFixed(1) : 0;
 
-      // Save Test Result to Firebase
-      if (currentUser) {
-        try {
-          await db.collection("results").add({
-            userId: currentUser.uid,
-            userName: currentUser.displayName,
-            userPhoto: currentUser.photoURL,
-            exam: selectedExam,
-            score: score,
-            correct: correct,
-            wrong: wrong,
-            accuracy: accuracy,
-            submittedAt: Date.now()
-          });
-        } catch (err) {
-          console.error("Result save error:", err);
-        }
-      }
-
       document.getElementById("resScore").innerText = score;
       document.getElementById("resCorrect").innerText = correct;
       document.getElementById("resWrong").innerText = wrong;
       document.getElementById("resAccuracy").innerText = accuracy + "%";
       document.getElementById("resultExamTitle").innerText = selectedExam;
 
-      // Render Detailed Solutions
       const solList = document.getElementById("solutionsList");
       solList.innerHTML = "";
 
@@ -439,7 +446,6 @@
 
         const card = document.createElement("div");
         card.className = "bg-gray-700/40 p-4 rounded-xl border border-gray-600 text-sm";
-
         card.innerHTML = `
           <div class="font-bold text-gray-200 mb-2">Q${i+1}. ${q.question}</div>
           <div class="grid grid-cols-2 gap-2 text-xs mb-2">
