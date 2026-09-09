@@ -79,7 +79,7 @@
       </div>
 
       <!-- Submit / Add Next Question Button -->
-      <button type="submit" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg transition shadow-md">
+      <button type="submit" id="submitBtn" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg transition shadow-md">
         ➕ Save & Add Next Question
       </button>
 
@@ -89,7 +89,6 @@
   </div>
 
   <script>
-    // Exact Pattern Rules for Exams
     const examRules = {
       "UPSSSC PET": {
         "General Knowledge (GK/GS)": 50,
@@ -155,10 +154,8 @@
       }
     }
 
-    // Initial call
     updateSubjects();
 
-    // Form Submit Handler
     document.getElementById("questionForm").addEventListener("submit", function(e) {
       e.preventDefault();
 
@@ -170,7 +167,7 @@
       const currentCount = questions.filter(q => q.exam === selectedExam && q.subject === selectedSubject).length;
 
       if (currentCount >= targetLimit) {
-        alert(`Is Subject (${selectedSubject}) ke poore ${targetLimit} questions pehle hi add ho chuke hain! Ab dropdown se agla subject select karein.`);
+        alert(`Is Subject (${selectedSubject}) ke poore ${targetLimit} questions pehle hi add ho chuke hain! Ab agla subject select karein.`);
         return;
       }
 
@@ -196,16 +193,16 @@
       statusMsg.innerText = `✅ Question Saved! (${currentCount + 1}/${targetLimit})`;
       statusMsg.classList.remove("hidden");
 
-      // Reset Inputs
-      document.getElementById("qHi").value = "";
-      document.getElementById("optA").value = "";
-      document.getElementById("optB").value = "";
-      document.getElementById("optC").value = "";
-      document.getElementById("optD").value = "";
-      document.getElementById("correctAns").value = "";
+      // Reset Form Proper Way
+      document.getElementById("questionForm").reset();
+      document.getElementById("examSelect").value = selectedExam;
+      document.getElementById("subjectSelect").value = selectedSubject;
+
+      // Auto-Focus Back to Question Box
+      document.getElementById("qHi").focus();
 
       updateCounter();
-      setTimeout(() => { statusMsg.classList.add("hidden"); }, 3000);
+      setTimeout(() => { statusMsg.classList.add("hidden"); }, 2500);
     });
   </script>
 </body>
