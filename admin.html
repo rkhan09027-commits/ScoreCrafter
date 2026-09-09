@@ -37,65 +37,40 @@
   </div>
 </div>
             <!-- Question Hindi -->
-            <div class="mb-4">
-                <label class="block text-sm font-semibold mb-1">Question (Hindi)</label>
-                <textarea id="qHi" required class="w-full p-2 bg-gray-700 rounded text-white"></textarea>
-            </div>
-            <!-- Question English -->
-            <div class="mb-4">
-                <label class="block text-sm font-semibold mb-1">Question (English)</label>
-                <textarea id="qEn"  class="w-full p-2 bg-gray-700 rounded text-white"></textarea>
-            </div>
+           <!-- Question Text (Hindi Only) -->
+<div class="mb-4">
+  <label class="block text-sm font-semibold mb-1">Question (Hindi):</label>
+  <textarea id="qHi" required class="w-full p-2 bg-gray-700 rounded text-white" rows="3" placeholder="Yahan Hindi mein sawaal type karein..."></textarea>
+</div>
 
-            <!-- Options Hindi -->
-            <div class="grid grid-cols-2 gap-2 mb-4">
-                <input type="text" id="optH0" placeholder="Option A (Hindi)" required class="p-2 bg-gray-700 rounded">
-                <input type="text" id="optH1" placeholder="Option B (Hindi)" required class="p-2 bg-gray-700 rounded">
-                <input type="text" id="optH2" placeholder="Option C (Hindi)" required class="p-2 bg-gray-700 rounded">
-                <input type="text" id="optH3" placeholder="Option D (Hindi)" required class="p-2 bg-gray-700 rounded">
-            </div>
+<!-- 4 Options (Hindi) -->
+<div class="grid grid-cols-2 gap-4 mb-4">
+  <div>
+    <label class="block text-xs text-gray-400 mb-1">Option A</label>
+    <input type="text" id="optA" required placeholder="Option A (Hindi)" class="w-full p-2 bg-gray-700 rounded text-white">
+  </div>
+  <div>
+    <label class="block text-xs text-gray-400 mb-1">Option B</label>
+    <input type="text" id="optB" required placeholder="Option B (Hindi)" class="w-full p-2 bg-gray-700 rounded text-white">
+  </div>
+  <div>
+    <label class="block text-xs text-gray-400 mb-1">Option C</label>
+    <input type="text" id="optC" required placeholder="Option C (Hindi)" class="w-full p-2 bg-gray-700 rounded text-white">
+  </div>
+  <div>
+    <label class="block text-xs text-gray-400 mb-1">Option D</label>
+    <input type="text" id="optD" required placeholder="Option D (Hindi)" class="w-full p-2 bg-gray-700 rounded text-white">
+  </div>
+</div>
 
-            <!-- Options English -->
-            <div class="grid grid-cols-2 gap-2 mb-4">
-                <input type="text" id="optE0" placeholder="Option A (English)" required class="p-2 bg-gray-700 rounded">
-                <input type="text" id="optE1" placeholder="Option B (English)" required class="p-2 bg-gray-700 rounded">
-                <input type="text" id="optE2" placeholder="Option E (English)" required class="p-2 bg-gray-700 rounded">
-                <input type="text" id="optE3" placeholder="Option D (English)" required class="p-2 bg-gray-700 rounded">
-            </div>
-
-            <button type="submit" class="w-full bg-green-600 font-bold py-3 rounded hover:bg-green-700">Add Question to Portal</button>
-        </form>
-    </div>
-
-    <script>
-        function addQuestion(e) {
-            e.preventDefault();
-            let currentQs = JSON.parse(localStorage.getItem('customQuestions')) || [];
-            
-            const newQ = {
-                hi: document.getElementById('qHi').value,
-                en: document.getElementById('qEn').value,
-                optsHi: [
-                    document.getElementById('optH0').value,
-                    document.getElementById('optH1').value,
-                    document.getElementById('optH2').value,
-                    document.getElementById('optH3').value
-                ],
-                optsEn: [
-                    document.getElementById('optE0').value,
-                    document.getElementById('optE1').value,
-                    document.getElementById('optE2').value,
-                    document.getElementById('optE3').value
-                ],
-                status: 'not-visited',
-                selected: null
-            };
-
-            currentQs.push(newQ);
-            localStorage.setItem('customQuestions', JSON.stringify(currentQs));
-            alert("Question Added Successfully!");
-            location.reload();
-        }
-    </script>
-</body>
-</html>
+<!-- Correct Answer Dropdown -->
+<div class="mb-6">
+  <label class="block text-sm font-semibold mb-1 text-yellow-400">Select Correct Answer (Sahi Option Chunen):</label>
+  <select id="correctAns" required class="w-full p-2 bg-gray-700 rounded text-white border border-yellow-500 font-bold">
+    <option value="">-- Choose Correct Option --</option>
+    <option value="A">Option A</option>
+    <option value="B">Option B</option>
+    <option value="C">Option C</option>
+    <option value="D">Option D</option>
+  </select>
+</div>
