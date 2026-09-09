@@ -12,56 +12,74 @@
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col font-sans">
 
-  <!-- Header -->
-  <header class="bg-gray-800 border-b border-gray-700 p-4 flex justify-between items-center shadow-md">
-    <div class="flex items-center space-x-2">
-      <span class="text-2xl font-black text-yellow-400 tracking-wider">SCORECRAFTERS</span>
-      <span class="bg-blue-600 text-xs text-white px-2 py-0.5 rounded font-bold">MOCK TEST</span>
+  <!-- Header / Navbar -->
+  <header class="bg-gray-800 border-b border-gray-700 sticky top-0 z-40 px-4 py-3 flex justify-between items-center shadow-lg">
+    <div class="flex items-center space-x-3 cursor-pointer" onclick="goHome()">
+      <div class="bg-yellow-500 text-gray-900 font-black px-2.5 py-1 rounded-lg text-lg tracking-wider">SC</div>
+      <div>
+        <span class="text-xl font-black text-yellow-400 tracking-wider block leading-none">SCORECRAFTERS</span>
+        <span class="text-[10px] text-gray-400 tracking-widest uppercase">Target Exam Success</span>
+      </div>
     </div>
 
     <!-- User Profile / Auth Area -->
     <div id="authArea" class="flex items-center space-x-3">
-      <button id="loginBtn" onclick="loginWithGoogle()" class="bg-white hover:bg-gray-100 text-gray-800 font-bold px-4 py-1.5 rounded-lg text-sm transition flex items-center space-x-2 shadow">
+      <button id="loginBtn" onclick="loginWithGoogle()" class="bg-white hover:bg-gray-100 text-gray-800 font-bold px-4 py-2 rounded-xl text-xs transition flex items-center space-x-2 shadow">
         <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-        <span>Sign in with Google</span>
+        <span>Google Login</span>
       </button>
 
-      <div id="userInfo" class="hidden flex items-center space-x-2">
-        <img id="userAvatar" class="w-8 h-8 rounded-full border border-yellow-400" src="" alt="User">
+      <div id="userInfo" class="hidden flex items-center space-x-3 bg-gray-700/50 p-1.5 pr-3 rounded-full border border-gray-600">
+        <img id="userAvatar" class="w-7 h-7 rounded-full border border-yellow-400" src="" alt="User">
         <span id="userName" class="text-xs font-semibold text-gray-200 hidden sm:inline"></span>
-        <button onclick="logout()" class="text-xs bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded text-gray-300">Logout</button>
+        <button onclick="logout()" class="text-[11px] bg-red-600/80 hover:bg-red-600 px-2 py-0.5 rounded text-white font-medium">Logout</button>
       </div>
     </div>
 
-    <div id="timerBox" class="hidden bg-red-900/80 border border-red-500 text-red-200 text-sm font-mono px-3 py-1 rounded-lg animate-pulse">
+    <div id="timerBox" class="hidden bg-red-900/80 border border-red-500 text-red-200 text-xs font-mono px-3 py-1.5 rounded-lg animate-pulse">
       Time Remaining: <span id="time" class="font-bold text-white">00:00</span>
     </div>
   </header>
 
-  <!-- Setup Screen -->
-  <main id="setupScreen" class="flex-1 flex justify-center items-center p-6">
-    <div class="bg-gray-800 border border-gray-700 p-8 rounded-2xl max-w-md w-full shadow-2xl text-center">
-      <h2 class="text-2xl font-bold text-yellow-400 mb-2">Select Your Exam</h2>
-      <p class="text-xs text-gray-400 mb-6">Apna exam chunen aur live test start karein</p>
-
-      <div class="mb-6 text-left">
-        <label class="block text-xs font-semibold text-gray-300 mb-2">TARGET EXAM:</label>
-        <select id="examSelect" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white font-semibold">
-          <option value="UPSSSC PET">UPSSSC PET</option>
-          <option value="UP Police SI">UP Police SI (Daroga)</option>
-          <option value="UP Police Constable">UP Police Constable</option>
-          <option value="RPF Constable">RPF Constable</option>
-          <option value="RPF SI">RPF SI</option>
-        </select>
+  <!-- Homepage / Test Catalogue View -->
+  <div id="homePage" class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6">
+    
+    <!-- Hero Banner -->
+    <div class="bg-gradient-to-r from-yellow-600 to-amber-700 rounded-3xl p-6 md:p-10 mb-8 border border-yellow-500/30 shadow-2xl relative overflow-hidden">
+      <div class="relative z-10 max-w-2xl">
+        <span class="bg-black/30 text-yellow-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3 inline-block">Best Exam Preparation Portal</span>
+        <h1 class="text-3xl md:text-5xl font-black text-white leading-tight mb-3">Apni Exam Tayari Ko Dijiye Nayi Raftaar!</h1>
+        <p class="text-yellow-100 text-sm md:text-base mb-6">Latest Exam Pattern, Detailed Vyakhya (Explanations) aur Real Exam Interface ke saath Mock Tests solve karein.</p>
+        <a href="#testCatalogue" class="bg-gray-900 text-yellow-400 font-extrabold px-6 py-3 rounded-xl hover:bg-black transition shadow-lg inline-block text-sm">
+          🔥 View Test Series
+        </a>
       </div>
-
-      <button onclick="startTest()" id="startBtn" class="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-extrabold py-3 rounded-lg transition shadow-lg text-lg">
-        🚀 Start Mock Test
-      </button>
     </div>
-  </main>
 
-  <!-- Test Interface -->
+    <!-- Exam Category Filters -->
+    <div id="testCatalogue" class="mb-6">
+      <h2 class="text-2xl font-black text-yellow-400 mb-4 flex items-center space-x-2">
+        <span>📚 Select Target Exam</span>
+      </h2>
+      <div id="categoryTabs" class="flex space-x-2 overflow-x-auto pb-2 scrollbar-none">
+        <button onclick="filterCategory('ALL')" class="cat-btn active bg-yellow-500 text-gray-900 font-bold px-4 py-2 rounded-xl text-xs whitespace-nowrap transition">All Exams</button>
+        <button onclick="filterCategory('UP Police SI')" class="cat-btn bg-gray-800 text-gray-300 hover:bg-gray-700 font-bold px-4 py-2 rounded-xl text-xs whitespace-nowrap transition border border-gray-700">UP Police SI</button>
+        <button onclick="filterCategory('UP Police Constable')" class="cat-btn bg-gray-800 text-gray-300 hover:bg-gray-700 font-bold px-4 py-2 rounded-xl text-xs whitespace-nowrap transition border border-gray-700">UP Constable</button>
+        <button onclick="filterCategory('UPSSSC PET')" class="cat-btn bg-gray-800 text-gray-300 hover:bg-gray-700 font-bold px-4 py-2 rounded-xl text-xs whitespace-nowrap transition border border-gray-700">UPSSSC PET</button>
+        <button onclick="filterCategory('RPF SI')" class="cat-btn bg-gray-800 text-gray-300 hover:bg-gray-700 font-bold px-4 py-2 rounded-xl text-xs whitespace-nowrap transition border border-gray-700">RPF SI</button>
+      </div>
+    </div>
+
+    <!-- Test Cards Grid -->
+    <div id="testGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+      <!-- Cards Javascript se load honge -->
+      <div class="col-span-full text-center py-12 text-gray-400 text-sm">
+        ⏳ Test Series Load ho rahi hai...
+      </div>
+    </div>
+  </div>
+
+  <!-- Test Interface (Hidden by default) -->
   <div id="testInterface" class="hidden flex-1 flex flex-col md:flex-row h-[calc(100vh-65px)]">
     <div class="flex-1 p-6 overflow-y-auto flex flex-col justify-between">
       <div>
@@ -97,9 +115,10 @@
     <div class="bg-gray-800 border border-gray-700 rounded-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
       <div class="text-center border-b border-gray-700 pb-4 mb-4">
         <h2 class="text-2xl font-bold text-yellow-400">Mock Test Result</h2>
-        <p id="resultExamTitle" class="text-xs text-gray-400"></p>
+        <p id="resultExamTitle" class="text-xs text-gray-400 mb-2"></p>
       </div>
 
+      <!-- Scorecard Grid -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <div class="bg-gray-700/50 p-3 rounded-xl border border-gray-600 text-center">
           <span class="block text-xs text-gray-400">Total Score</span>
@@ -119,16 +138,23 @@
         </div>
       </div>
 
+      <!-- Solutions Section -->
       <div class="border-t border-gray-700 pt-4">
         <h3 class="text-lg font-bold text-yellow-400 mb-3">Detailed Solutions & Explanations</h3>
         <div id="solutionsList" class="space-y-4"></div>
       </div>
 
-      <button onclick="location.reload()" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg mt-6 transition">
-        🔄 Re-take Test
+      <button onclick="goHome()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-extrabold py-3 rounded-lg mt-6 transition">
+        🏠 Back To Homepage
       </button>
     </div>
   </div>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 border-t border-gray-700 py-6 text-center text-xs text-gray-400 mt-auto">
+    <p>© 2026 <span class="text-yellow-400 font-bold">ScoreCrafters</span>. All rights reserved.</p>
+    <p class="mt-1">Dedicated Mock Test Portal for Police & Competitive Exams</p>
+  </footer>
 
   <script>
     const firebaseConfig = {
@@ -146,6 +172,7 @@
     let userAnswers = {};
     let currentIndex = 0;
     let selectedExam = "";
+    let allAvailableExams = [];
 
     // Auth Observer
     auth.onAuthStateChanged(user => {
@@ -171,18 +198,93 @@
       auth.signOut();
     }
 
-    async function startTest() {
+    // Load Exam Cards on Startup
+    window.onload = function() {
+      loadExamCards();
+    };
+
+    async function loadExamCards() {
+      const grid = document.getElementById("testGrid");
+      try {
+        const snapshot = await db.collection("questions").get();
+        const exams = new Set();
+        
+        snapshot.docs.forEach(doc => {
+          const data = doc.data();
+          if (data.exam) exams.add(data.exam);
+        });
+
+        allAvailableExams = Array.from(exams);
+
+        if (allAvailableExams.length === 0) {
+          grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400 text-sm">Abhi tak koi Test Series upload nahi hui hai. Admin Panel se questions add karein!</div>`;
+          return;
+        }
+
+        renderExamCards(allAvailableExams);
+      } catch (err) {
+        grid.innerHTML = `<div class="col-span-full text-center py-12 text-red-400 text-sm">Error loading test series: ${err.message}</div>`;
+      }
+    }
+
+    function renderExamCards(examList) {
+      const grid = document.getElementById("testGrid");
+      grid.innerHTML = "";
+
+      examList.forEach((examName, idx) => {
+        const card = document.createElement("div");
+        card.className = "bg-gray-800 border border-gray-700 rounded-2xl p-5 hover:border-yellow-500/50 transition shadow-xl flex flex-col justify-between";
+
+        card.innerHTML = `
+          <div>
+            <div class="flex justify-between items-start mb-3">
+              <span class="bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">FREE MOCK TEST</span>
+              <span class="text-xs text-gray-400 font-mono">Test #${idx + 1}</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">${examName} Full Mock Test</h3>
+            <p class="text-xs text-gray-400 mb-4">Official Syllabus par aadharit sabhi subjects ke important questions aur vyakhya.</p>
+            
+            <div class="flex items-center space-x-4 text-xs text-gray-300 font-medium mb-6 bg-gray-900/50 p-2.5 rounded-xl border border-gray-700/50">
+              <span class="flex items-center">📝 Bilingual</span>
+              <span class="flex items-center">⏱️ Timed Test</span>
+              <span class="flex items-center">💡 Vyakhya</span>
+            </div>
+          </div>
+
+          <button onclick="startSpecificTest('${examName}')" class="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-extrabold py-3 rounded-xl transition shadow-lg text-sm flex items-center justify-center space-x-2">
+            <span>🚀 Start Test Now</span>
+          </button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function filterCategory(category) {
+      // Button UI Highlight
+      const btns = document.querySelectorAll('.cat-btn');
+      btns.forEach(btn => {
+        btn.classList.remove('bg-yellow-500', 'text-gray-900');
+        btn.classList.add('bg-gray-800', 'text-gray-300');
+      });
+      event.target.classList.remove('bg-gray-800', 'text-gray-300');
+      event.target.classList.add('bg-yellow-500', 'text-gray-900');
+
+      if (category === 'ALL') {
+        renderExamCards(allAvailableExams);
+      } else {
+        const filtered = allAvailableExams.filter(e => e.toLowerCase().includes(category.toLowerCase()));
+        renderExamCards(filtered.length > 0 ? filtered : [category]);
+      }
+    }
+
+    async function startSpecificTest(examName) {
       if (!currentUser) {
-        alert("Pehle Google Login karein taaki aapka result aur rank save ho sake!");
+        alert("Pehle Google Login karein taaki aapka test result safe rahe!");
         loginWithGoogle();
         return;
       }
 
-      const startBtn = document.getElementById("startBtn");
-      startBtn.disabled = true;
-      startBtn.innerText = "⏳ Loading Questions...";
-
-      selectedExam = document.getElementById("examSelect").value;
+      selectedExam = examName;
 
       try {
         const snapshot = await db.collection("questions")
@@ -192,13 +294,11 @@
         currentQuestions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         if (currentQuestions.length === 0) {
-          alert("Is Exam ke abhi tak koi questions add nahi hue hain!");
-          startBtn.disabled = false;
-          startBtn.innerText = "🚀 Start Mock Test";
+          alert("Is Exam ke abhi questions add nahi hain! Admin Panel se add karein.");
           return;
         }
 
-        document.getElementById("setupScreen").classList.add("hidden");
+        document.getElementById("homePage").classList.add("hidden");
         document.getElementById("testInterface").classList.remove("hidden");
         document.getElementById("timerBox").classList.remove("hidden");
 
@@ -207,9 +307,11 @@
         renderPalette();
       } catch (err) {
         alert("Error fetching test: " + err.message);
-        startBtn.disabled = false;
-        startBtn.innerText = "🚀 Start Mock Test";
       }
+    }
+
+    function goHome() {
+      location.reload();
     }
 
     function renderSubjects() {
@@ -302,7 +404,7 @@
       const score = (correct * 1) - (wrong * 0.25);
       const accuracy = totalAttempted > 0 ? ((correct / totalAttempted) * 100).toFixed(1) : 0;
 
-      // Save Test Result to Firebase Leaderboard
+      // Save Test Result to Firebase
       if (currentUser) {
         try {
           await db.collection("results").add({
@@ -327,6 +429,7 @@
       document.getElementById("resAccuracy").innerText = accuracy + "%";
       document.getElementById("resultExamTitle").innerText = selectedExam;
 
+      // Render Detailed Solutions
       const solList = document.getElementById("solutionsList");
       solList.innerHTML = "";
 
