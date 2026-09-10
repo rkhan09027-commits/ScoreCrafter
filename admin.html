@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ScoreCrafters - Admin Panel</title>
+  <title>ScoreCrafters - Advanced Dynamic Admin Panel</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
@@ -14,18 +13,21 @@
   <div class="max-w-3xl mx-auto bg-gray-800 p-8 rounded-2xl border border-gray-700 shadow-2xl">
     <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
       <h1 class="text-2xl font-black text-yellow-400">ScoreCrafters Admin Panel</h1>
-      <span class="bg-yellow-500/10 text-yellow-400 text-xs font-bold px-3 py-1 rounded-full border border-yellow-500/30">Question Upload</span>
+      <span class="bg-yellow-500/10 text-yellow-400 text-xs font-bold px-3 py-1 rounded-full border border-yellow-500/30">Pattern Based Creator</span>
     </div>
 
     <form id="questionForm" class="space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      
+      <!-- Exam & Price Selection -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs text-gray-400 mb-1">Target Exam Name</label>
-          <input type="text" id="examName" placeholder="e.g. UP Police SI" class="w-full bg-gray-700 border border-gray-600 rounded-xl p-3 text-sm focus:outline-none focus:border-yellow-400" required>
-        </div>
-        <div>
-          <label class="block text-xs text-gray-400 mb-1">Subject</label>
-          <input type="text" id="subjectName" placeholder="e.g. Hindi / Samanya Gyan" class="w-full bg-gray-700 border border-gray-600 rounded-xl p-3 text-sm focus:outline-none focus:border-yellow-400" required>
+          <label class="block text-xs font-bold text-gray-300 mb-1">Target Exam Pattern</label>
+          <select id="examSelect" onchange="onExamChange()" class="w-full bg-gray-700 border border-yellow-500/50 rounded-xl p-3 text-sm focus:outline-none focus:border-yellow-400 font-bold text-yellow-300">
+            <option value="UPSSSC PET">UPSSSC PET (100 Qs)</option>
+            <option value="UP Police SI">UP Police SI (160 Qs)</option>
+            <option value="UP Police Constable">UP Police Constable (150 Qs)</option>
+            <option value="RPF SI">RPF SI (120 Qs)</option>
+          </select>
         </div>
         <div>
           <label class="block text-xs font-bold text-yellow-400 mb-1">Test Series Price (₹)</label>
@@ -33,21 +35,38 @@
         </div>
       </div>
 
+      <!-- Dynamic Subject Selection -->
+      <div>
+        <label class="block text-xs font-bold text-gray-300 mb-1">Subject / Section</label>
+        <select id="subjectSelect" onchange="updateLimitStatus()" class="w-full bg-gray-700 border border-gray-600 rounded-xl p-3 text-sm focus:outline-none focus:border-yellow-400">
+          <!-- Dynamic Subjects Loaded Via JS -->
+        </select>
+      </div>
+
+      <!-- Live Limit Progress Status Bar -->
+      <div id="limitStatusBar" class="bg-gray-700/60 border border-gray-600 rounded-xl p-3 flex justify-between items-center text-xs">
+        <span class="text-gray-300">Is Section ke Questions:</span>
+        <span class="font-bold text-yellow-400 text-sm"><span id="currentCount">0</span> / <span id="maxLimit">0</span> Added</span>
+      </div>
+
+      <!-- Question Text -->
       <div>
         <label class="block text-xs text-gray-400 mb-1">Question Text (Hindi/English)</label>
         <textarea id="questionText" rows="3" placeholder="Sawal likhein..." class="w-full bg-gray-700 border border-gray-600 rounded-xl p-3 text-sm focus:outline-none focus:border-yellow-400" required></textarea>
       </div>
 
+      <!-- Options -->
       <div class="grid grid-cols-2 gap-4">
-        <input type="text" id="optA" placeholder="Option A" class="bg-gray-700 border border-gray-600 rounded-xl p-3 text-sm focus:outline-none focus:border-yellow-400" required>
-        <input type="text" id="optB" placeholder="Option B" class="bg-gray-700 border border-gray-600 rounded-xl p-3 text-sm focus:outline-none focus:border-yellow-400" required>
-        <input type="text" id="optC" placeholder="Option C" class="bg-gray-700 border border-gray-600 rounded-xl p-3 text-sm focus:outline-none focus:border-yellow-400" required>
-        <input type="text" id="optD" placeholder="Option D" class="bg-gray-700 border border-gray-600 rounded-xl p-3 text-sm focus:outline-none focus:border-yellow-400" required>
+        <input type="text" id="optA" placeholder="Option A" class="bg-gray-700 border border-gray-600 rounded-xl p-3 text-sm focus:outline-none" required>
+        <input type="text" id="optB" placeholder="Option B" class="bg-gray-700 border border-gray-600 rounded-xl p-3 text-sm focus:outline-none" required>
+        <input type="text" id="optC" placeholder="Option C" class="bg-gray-700 border border-gray-600 rounded-xl p-3 text-sm focus:outline-none" required>
+        <input type="text" id="optD" placeholder="Option D" class="bg-gray-700 border border-gray-600 rounded-xl p-3 text-sm focus:outline-none" required>
       </div>
 
+      <!-- Correct Option -->
       <div>
         <label class="block text-xs text-gray-400 mb-1">Correct Answer Option</label>
-        <select id="correctOpt" class="w-full bg-gray-700 border border-gray-600 rounded-xl p-3 text-sm focus:outline-none focus:border-yellow-400">
+        <select id="correctOpt" class="w-full bg-gray-700 border border-gray-600 rounded-xl p-3 text-sm">
           <option value="A">Option A</option>
           <option value="B">Option B</option>
           <option value="C">Option C</option>
@@ -55,19 +74,46 @@
         </select>
       </div>
 
+      <!-- Explanation -->
       <div>
         <label class="block text-xs text-gray-400 mb-1">Detailed Explanation (Vyakhya)</label>
-        <textarea id="explanationText" rows="2" placeholder="Sawal ka detail solution..." class="w-full bg-gray-700 border border-gray-600 rounded-xl p-3 text-sm focus:outline-none focus:border-yellow-400"></textarea>
+        <textarea id="explanationText" rows="2" placeholder="Sawal ka detail solution..." class="w-full bg-gray-700 border border-gray-600 rounded-xl p-3 text-sm"></textarea>
       </div>
 
       <button type="submit" class="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-extrabold py-3.5 rounded-xl transition shadow-lg text-sm">
-        ➕ Add Question & Set Price
+        ➕ Add Question
       </button>
     </form>
     <div id="statusMsg" class="mt-4 text-center text-sm font-semibold"></div>
   </div>
 
   <script>
+    const examPatterns = {
+      "UPSSSC PET": [
+        { name: "General Knowledge & GS", limit: 50 },
+        { name: "Mathematics & DI", limit: 30 },
+        { name: "General Hindi", limit: 15 },
+        { name: "Reasoning & Logic", limit: 5 }
+      ],
+      "UP Police SI": [
+        { name: "Samanya Hindi", limit: 40 },
+        { name: "Moolvidhi / Samvidhan / GK", limit: 40 },
+        { name: "Sankhyatmak & Mansik Yogyata", limit: 40 },
+        { name: "Reasoning & Mental Aptitude", limit: 40 }
+      ],
+      "UP Police Constable": [
+        { name: "General Knowledge", limit: 38 },
+        { name: "General Hindi", limit: 37 },
+        { name: "Numerical & Mental Ability", limit: 38 },
+        { name: "Mental Aptitude / Reasoning", limit: 37 }
+      ],
+      "RPF SI": [
+        { name: "General Awareness", limit: 50 },
+        { name: "Arithmetic (Maths)", limit: 35 },
+        { name: "General Intelligence & Reasoning", limit: 35 }
+      ]
+    };
+
     const firebaseConfig = {
       projectId: "scorecrafter-b4ff1",
       authDomain: "scorecrafter-b4ff1.firebaseapp.com",
@@ -77,16 +123,77 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    let questionCounts = {};
+
+    async function onExamChange() {
+      const exam = document.getElementById("examSelect").value;
+      const subjectSelect = document.getElementById("subjectSelect");
+      subjectSelect.innerHTML = "";
+
+      examPatterns[exam].forEach(sub => {
+        const opt = document.createElement("option");
+        opt.value = sub.name;
+        opt.setAttribute("data-limit", sub.limit);
+        opt.innerText = `${sub.name} (Limit: ${sub.limit} Qs)`;
+        subjectSelect.appendChild(opt);
+      });
+
+      await fetchCurrentQuestionCounts(exam);
+      updateLimitStatus();
+    }
+
+    async function fetchCurrentQuestionCounts(exam) {
+      questionCounts = {};
+      const snap = await db.collection("questions").where("exam", "==", exam).get();
+      snap.docs.forEach(doc => {
+        const data = doc.data();
+        questionCounts[data.subject] = (questionCounts[data.subject] || 0) + 1;
+      });
+    }
+
+    function updateLimitStatus() {
+      const subjectSelect = document.getElementById("subjectSelect");
+      if (!subjectSelect.options.length) return;
+
+      const selectedOpt = subjectSelect.options[subjectSelect.selectedIndex];
+      const subName = selectedOpt.value;
+      const limit = parseInt(selectedOpt.getAttribute("data-limit"));
+
+      const current = questionCounts[subName] || 0;
+      document.getElementById("currentCount").innerText = current;
+      document.getElementById("maxLimit").innerText = limit;
+
+      const bar = document.getElementById("limitStatusBar");
+      if (current >= limit) {
+        bar.className = "bg-red-900/40 border border-red-500 rounded-xl p-3 flex justify-between items-center text-xs text-red-300";
+      } else {
+        bar.className = "bg-gray-700/60 border border-gray-600 rounded-xl p-3 flex justify-between items-center text-xs text-gray-300";
+      }
+    }
+
     document.getElementById("questionForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+      const exam = document.getElementById("examSelect").value;
+      const subjectSelect = document.getElementById("subjectSelect");
+      const selectedOpt = subjectSelect.options[subjectSelect.selectedIndex];
+      const subject = selectedOpt.value;
+      const maxLimit = parseInt(selectedOpt.getAttribute("data-limit"));
+      const currentCount = questionCounts[subject] || 0;
+
+      // 🛑 STRICT PATTERN LIMIT CHECK
+      if (currentCount >= maxLimit) {
+        alert(`⚠️ Stop! ${exam} ke ${subject} section ki maximum limit (${maxLimit} Questions) poori ho chuki hai! Isse zyada question upload nahi ho sakte.`);
+        return;
+      }
+
       const status = document.getElementById("statusMsg");
       status.innerText = "⏳ Saving question...";
       status.className = "mt-4 text-center text-sm font-semibold text-yellow-400";
 
       try {
         await db.collection("questions").add({
-          exam: document.getElementById("examName").value.trim(),
-          subject: document.getElementById("subjectName").value.trim(),
+          exam: exam,
+          subject: subject,
           price: Number(document.getElementById("testPrice").value) || 0,
           question: document.getElementById("questionText").value.trim(),
           options: {
@@ -100,10 +207,13 @@
           createdAt: Date.now()
         });
 
-        status.innerText = "✅ Question successfully added with Price setting!";
+        questionCounts[subject] = currentCount + 1;
+        updateLimitStatus();
+
+        status.innerText = `✅ Question Added! (${questionCounts[subject]}/${maxLimit})`;
         status.className = "mt-4 text-center text-sm font-semibold text-green-400";
 
-        // Reset Question fields keeping Exam & Price same for fast entry
+        // Reset input fields
         document.getElementById("questionText").value = "";
         document.getElementById("optA").value = "";
         document.getElementById("optB").value = "";
@@ -115,6 +225,9 @@
         status.className = "mt-4 text-center text-sm font-semibold text-red-400";
       }
     });
+
+    // Initial Load
+    window.onload = onExamChange;
   </script>
 </body>
 </html>
